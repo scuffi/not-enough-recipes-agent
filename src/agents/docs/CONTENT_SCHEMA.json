@@ -1,0 +1,1492 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Not Enough Recipes - Dynamic Item/Block Registry Schema",
+  "description": "Complete JSON schema for dynamically registering items and blocks in Minecraft 1.21.11. Supports ALL Minecraft data components.",
+  "version": "1.0.0",
+  "minecraft_version": "1.21.11",
+
+  "definitions": {
+    "text_component": {
+      "type": "object",
+      "description": "Minecraft text component with formatting",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content"
+        },
+        "color": {
+          "type": "string",
+          "description": "Color name or hex code",
+          "enum": [
+            "black",
+            "dark_blue",
+            "dark_green",
+            "dark_aqua",
+            "dark_red",
+            "dark_purple",
+            "gold",
+            "gray",
+            "dark_gray",
+            "blue",
+            "green",
+            "aqua",
+            "red",
+            "light_purple",
+            "yellow",
+            "white"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "bold": { "type": "boolean" },
+        "italic": { "type": "boolean" },
+        "underlined": { "type": "boolean" },
+        "strikethrough": { "type": "boolean" },
+        "obfuscated": { "type": "boolean" }
+      }
+    },
+
+    "item_definition": {
+      "type": "object",
+      "required": ["id", "texture"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique item identifier (no namespace, automatically prefixed with 'ner:')",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "texture": {
+          "type": "string",
+          "description": "Texture filename without .png extension (e.g., 'diamond_sword')"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Item tags for categorization and queries",
+          "items": {
+            "type": "string",
+            "examples": [
+              "minecraft:swords",
+              "minecraft:boots",
+              "minecraft:helmets",
+              "minecraft:foods",
+              "ner:custom_items"
+            ]
+          }
+        },
+        "components": {
+          "type": "object",
+          "description": "Minecraft 1.21.11 data components - ALL components are supported",
+          "properties": {
+            "max_stack_size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99,
+              "description": "Maximum stack size"
+            },
+            "max_damage": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum durability (cannot be combined with max_stack_size > 1)"
+            },
+            "damage": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Current damage value (uses consumed)"
+            },
+            "rarity": {
+              "type": "string",
+              "enum": ["common", "uncommon", "rare", "epic"],
+              "description": "Item rarity (affects name color)"
+            },
+            "enchantment_glint_override": {
+              "type": "boolean",
+              "description": "Force enchantment glint on (true) or off (false)"
+            },
+            "unbreakable": {
+              "type": "object",
+              "description": "Makes item unbreakable - use empty object {}",
+              "properties": {}
+            },
+            "custom_name": {
+              "$ref": "#/definitions/text_component",
+              "description": "Custom display name (can be changed in anvil, shows italic by default)"
+            },
+            "item_name": {
+              "$ref": "#/definitions/text_component",
+              "description": "Default item name (cannot be changed in anvil, not italic)"
+            },
+            "lore": {
+              "type": "array",
+              "description": "Item lore (max 256 lines). Each line can be a text component OR an array of text components for multi-colored text on a single line.",
+              "maxItems": 256,
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/text_component",
+                    "description": "Single text component (one color per line)"
+                  },
+                  {
+                    "type": "array",
+                    "description": "Array of text components for multi-colored text on a single line (gradients, color changes, etc.)",
+                    "items": {
+                      "$ref": "#/definitions/text_component"
+                    }
+                  }
+                ]
+              }
+            },
+            "enchantments": {
+              "type": "object",
+              "description": "Active enchantments (map of enchantment ID to level)",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "examples": [{ "sharpness": 10, "unbreaking": 5, "mending": 1 }]
+            },
+            "stored_enchantments": {
+              "type": "object",
+              "description": "Stored enchantments (for enchanted books)",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "attribute_modifiers": {
+              "type": "array",
+              "description": "Attribute modifiers (combat stats, etc.)",
+              "items": {
+                "type": "object",
+                "required": ["type", "amount", "operation", "id", "slot"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Attribute ID (1.21.11+ no longer uses generic./player./zombie. prefixes)",
+                    "enum": [
+                      "armor",
+                      "armor_toughness",
+                      "attack_damage",
+                      "attack_speed",
+                      "attack_knockback",
+                      "attack_range",
+                      "block_break_speed",
+                      "block_interaction_range",
+                      "burning_time",
+                      "camera_distance",
+                      "entity_interaction_range",
+                      "explosion_knockback_resistance",
+                      "fall_damage_multiplier",
+                      "flying_speed",
+                      "follow_range",
+                      "gravity",
+                      "jump_strength",
+                      "knockback_resistance",
+                      "luck",
+                      "max_absorption",
+                      "max_health",
+                      "mining_efficiency",
+                      "movement_efficiency",
+                      "movement_speed",
+                      "oxygen_bonus",
+                      "safe_fall_distance",
+                      "scale",
+                      "spawn_reinforcements",
+                      "sneaking_speed",
+                      "step_height",
+                      "submerged_mining_speed",
+                      "sweeping_damage_ratio",
+                      "tempt_range",
+                      "water_movement_efficiency",
+                      "waypoint_receive_range",
+                      "waypoint_transmit_range"
+                    ]
+                  },
+                  "amount": { "type": "number" },
+                  "operation": {
+                    "type": "string",
+                    "enum": [
+                      "add_value",
+                      "add_multiplied_base",
+                      "add_multiplied_total"
+                    ]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Unique modifier ID (e.g., 'ner:sword_damage')"
+                  },
+                  "slot": {
+                    "type": "string",
+                    "enum": [
+                      "any",
+                      "hand",
+                      "armor",
+                      "mainhand",
+                      "offhand",
+                      "head",
+                      "chest",
+                      "legs",
+                      "feet",
+                      "body",
+                      "saddle"
+                    ]
+                  },
+                  "display": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["default", "hidden", "override"]
+                      },
+                      "value": {
+                        "$ref": "#/definitions/text_component"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "consumable": {
+              "type": "object",
+              "description": "REQUIRED for items to be consumable (eat/drink). In 1.21.11+, food component alone is not enough!",
+              "properties": {
+                "consume_seconds": {
+                  "type": "number",
+                  "description": "Time to consume in seconds",
+                  "default": 1.6
+                },
+                "animation": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "eat",
+                    "drink",
+                    "block",
+                    "bow",
+                    "spear",
+                    "crossbow",
+                    "spyglass",
+                    "toot_horn",
+                    "brush",
+                    "bundle",
+                    "trident"
+                  ],
+                  "default": "eat"
+                },
+                "sound": {
+                  "type": "string",
+                  "description": "Sound event ID",
+                  "default": "entity.generic.eat"
+                },
+                "has_consume_particles": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "on_consume_effects": {
+                  "type": "array",
+                  "description": "Effects applied when consumed",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "apply_effects",
+                          "remove_effects",
+                          "clear_all_effects",
+                          "teleport_randomly",
+                          "play_sound"
+                        ]
+                      },
+                      "effects": {
+                        "type": "array",
+                        "description": "For apply_effects type",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string" },
+                            "duration": { "type": "integer" },
+                            "amplifier": { "type": "integer", "default": 0 }
+                          }
+                        }
+                      },
+                      "probability": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "default": 1.0
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "food": {
+              "type": "object",
+              "description": "Food stats (must be used WITH consumable component in 1.21.11+)",
+              "properties": {
+                "nutrition": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 20,
+                  "description": "Hunger points restored"
+                },
+                "saturation": {
+                  "type": "number",
+                  "description": "Saturation modifier"
+                },
+                "can_always_eat": {
+                  "type": "boolean",
+                  "description": "Can be eaten even when hunger is full",
+                  "default": false
+                }
+              }
+            },
+            "tool": {
+              "type": "object",
+              "description": "Tool properties (mining, damage per block)",
+              "properties": {
+                "default_mining_speed": {
+                  "type": "number",
+                  "default": 1.0
+                },
+                "damage_per_block": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "default": 1
+                },
+                "can_destroy_blocks_in_creative": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "blocks": {
+                        "oneOf": [
+                          { "type": "string" },
+                          { "type": "array", "items": { "type": "string" } }
+                        ]
+                      },
+                      "speed": { "type": "number" },
+                      "correct_for_drops": { "type": "boolean" }
+                    }
+                  }
+                }
+              }
+            },
+            "weapon": {
+              "type": "object",
+              "description": "Weapon properties (damage to item per attack, shield disabling)",
+              "properties": {
+                "item_damage_per_attack": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "default": 1
+                },
+                "disable_blocking_for_seconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0,
+                  "description": "Seconds to disable blocking shields on hit"
+                }
+              }
+            },
+            "attack_range": {
+              "type": "object",
+              "description": "Attack range and hitbox properties",
+              "properties": {
+                "min_reach": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 64,
+                  "default": 0
+                },
+                "max_reach": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 64,
+                  "default": 3
+                },
+                "min_creative_reach": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 64,
+                  "default": 0
+                },
+                "max_creative_reach": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 64,
+                  "default": 5
+                },
+                "hitbox_margin": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.3
+                },
+                "mob_factor": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "default": 1
+                }
+              }
+            },
+            "equippable": {
+              "type": "object",
+              "description": "Makes item equippable in specific slot",
+              "required": ["slot"],
+              "properties": {
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "head",
+                    "chest",
+                    "legs",
+                    "feet",
+                    "body",
+                    "mainhand",
+                    "offhand",
+                    "saddle"
+                  ]
+                },
+                "equip_sound": {
+                  "type": "string",
+                  "default": "item.armor.equip_generic"
+                },
+                "asset_id": {
+                  "type": "string",
+                  "description": "Equipment model ID (assets/<namespace>/equipment/<id>.json)"
+                },
+                "allowed_entities": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "array", "items": { "type": "string" } }
+                  ]
+                },
+                "dispensable": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "swappable": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "damage_on_hurt": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "equip_on_interact": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "camera_overlay": {
+                  "type": "string",
+                  "description": "Overlay texture when worn (e.g., pumpkin blur)"
+                },
+                "can_be_sheared": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "shearing_sound": {
+                  "type": "string",
+                  "default": "item.shears.snip"
+                }
+              }
+            },
+            "dyed_color": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "RGB color as decimal (Red<<16 + Green<<8 + Blue)"
+                },
+                {
+                  "type": "array",
+                  "description": "RGB as [r, g, b] fractions (0.0-1.0)",
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              ]
+            },
+            "trim": {
+              "type": "object",
+              "description": "Armor trim",
+              "required": ["pattern", "material"],
+              "properties": {
+                "pattern": {
+                  "type": "string",
+                  "description": "Trim pattern ID"
+                },
+                "material": {
+                  "type": "string",
+                  "description": "Trim material ID"
+                }
+              }
+            },
+            "custom_model_data": {
+              "type": "object",
+              "description": "NEVER include this property, it breaks our rendering system"
+            },
+            "item_model": {
+              "type": "string",
+              "description": "NEVER include this property, it breaks our rendering system"
+            },
+            "damage_resistant": {
+              "type": "object",
+              "description": "Invulnerable to damage types",
+              "required": ["types"],
+              "properties": {
+                "types": {
+                  "type": "string",
+                  "pattern": "^#",
+                  "description": "Damage type tag (e.g., '#minecraft:is_fire')"
+                }
+              }
+            },
+            "enchantable": {
+              "type": "object",
+              "description": "Makes item enchantable in enchanting table",
+              "required": ["value"],
+              "properties": {
+                "value": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Enchantability value (higher = better enchantments)"
+                }
+              }
+            },
+            "repairable": {
+              "type": "object",
+              "description": "Items that can repair this in an anvil",
+              "required": ["items"],
+              "properties": {
+                "items": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "array", "items": { "type": "string" } }
+                  ]
+                }
+              }
+            },
+            "repair_cost": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Anvil repair cost penalty",
+              "default": 0
+            },
+            "custom_data": {
+              "type": "object",
+              "description": "Custom NBT data for mods/datapacks",
+              "additionalProperties": true
+            },
+            "hide_tooltip": {
+              "type": "boolean",
+              "description": "Hides entire tooltip"
+            },
+            "tooltip_style": {
+              "type": "string",
+              "description": "Custom tooltip style (assets/<namespace>/textures/gui/sprites/tooltip/<id>)"
+            },
+            "can_break": {
+              "type": "object",
+              "description": "Blocks this item can break in Adventure mode",
+              "properties": {
+                "blocks": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "array", "items": { "type": "string" } }
+                  ]
+                },
+                "nbt": { "type": "object" },
+                "state": { "type": "object" }
+              }
+            },
+            "can_place_on": {
+              "type": "object",
+              "description": "Blocks this item can be placed on in Adventure mode",
+              "properties": {
+                "blocks": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "array", "items": { "type": "string" } }
+                  ]
+                },
+                "nbt": { "type": "object" },
+                "state": { "type": "object" }
+              }
+            },
+            "potion_contents": {
+              "type": "object",
+              "description": "Potion effects and color",
+              "properties": {
+                "potion": {
+                  "type": "string",
+                  "description": "Potion type ID (e.g., 'swiftness', 'strength')"
+                },
+                "custom_color": {
+                  "type": "integer",
+                  "description": "Custom potion color (RGB as decimal)"
+                },
+                "custom_name": {
+                  "type": "string",
+                  "description": "Custom potion name key"
+                },
+                "custom_effects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["id"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "amplifier": { "type": "integer", "default": 0 },
+                      "duration": { "type": "integer", "default": 1 },
+                      "ambient": { "type": "boolean", "default": false },
+                      "show_particles": { "type": "boolean", "default": true },
+                      "show_icon": { "type": "boolean", "default": true }
+                    }
+                  }
+                }
+              }
+            },
+            "potion_duration_scale": {
+              "type": "number",
+              "description": "Scales potion effect duration",
+              "default": 1.0
+            },
+            "suspicious_stew_effects": {
+              "type": "array",
+              "description": "Effects from suspicious stew",
+              "items": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "duration": {
+                    "type": "integer",
+                    "default": 160
+                  }
+                }
+              }
+            },
+            "ominous_bottle_amplifier": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "Bad Omen amplifier for ominous bottles"
+            },
+            "jukebox_playable": {
+              "type": "string",
+              "description": "Jukebox song ID to play when inserted"
+            },
+            "use_remainder": {
+              "type": "object",
+              "description": "Item to return after use (e.g., bowl from mushroom stew)",
+              "required": ["id"],
+              "properties": {
+                "id": { "type": "string" },
+                "count": { "type": "integer", "default": 1 },
+                "components": { "type": "object" }
+              }
+            },
+            "use_cooldown": {
+              "type": "object",
+              "description": "Cooldown after using item",
+              "required": ["seconds"],
+              "properties": {
+                "seconds": { "type": "number" },
+                "cooldown_group": {
+                  "type": "string",
+                  "description": "Share cooldown with other items in same group"
+                }
+              }
+            },
+            "use_effects": {
+              "type": "object",
+              "description": "Movement penalties and vibrations when using",
+              "properties": {
+                "can_sprint": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "speed_multiplier": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.2
+                },
+                "interact_vibrations": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "death_protection": {
+              "type": "object",
+              "description": "Protects holder from death (totem of undying effect)",
+              "properties": {
+                "death_effects": {
+                  "type": "array",
+                  "description": "Effects applied when saved from death",
+                  "items": { "type": "object" }
+                }
+              }
+            },
+            "glider": {
+              "type": "object",
+              "description": "Allows gliding like elytra",
+              "properties": {}
+            },
+            "blocks_attacks": {
+              "type": "object",
+              "description": "Shield-like blocking behavior",
+              "properties": {
+                "block_delay_seconds": {
+                  "type": "number",
+                  "default": 0
+                },
+                "disable_cooldown_scale": {
+                  "type": "number",
+                  "default": 1
+                },
+                "damage_reductions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "oneOf": [
+                          { "type": "string" },
+                          { "type": "array", "items": { "type": "string" } }
+                        ]
+                      },
+                      "base": { "type": "number" },
+                      "factor": { "type": "number" },
+                      "horizontal_blocking_angle": {
+                        "type": "number",
+                        "default": 90
+                      }
+                    }
+                  }
+                },
+                "item_damage": {
+                  "type": "object",
+                  "properties": {
+                    "threshold": { "type": "number", "default": 0 },
+                    "base": { "type": "number", "default": 0 },
+                    "factor": { "type": "number", "default": 1.5 }
+                  }
+                },
+                "block_sound": { "type": "string" },
+                "disabled_sound": { "type": "string" },
+                "bypassed_by": {
+                  "type": "string",
+                  "pattern": "^#",
+                  "description": "Damage type tag that bypasses blocking"
+                }
+              }
+            },
+            "piercing_weapon": {
+              "type": "object",
+              "description": "Melee attacks pierce multiple entities",
+              "properties": {
+                "deals_knockback": { "type": "boolean", "default": true },
+                "dismounts": { "type": "boolean", "default": false },
+                "sound": { "type": "string" },
+                "hit_sound": { "type": "string" }
+              }
+            },
+            "kinetic_weapon": {
+              "type": "object",
+              "description": "Charge-type attack based on velocity",
+              "properties": {
+                "delay_ticks": { "type": "integer", "default": 0 },
+                "damage_conditions": { "type": "object" },
+                "dismount_conditions": { "type": "object" },
+                "knockback_conditions": { "type": "object" },
+                "forward_movement": { "type": "number", "default": 0 },
+                "damage_multiplier": { "type": "number", "default": 1 },
+                "sound": { "type": "string" },
+                "hit_sound": { "type": "string" }
+              }
+            },
+            "minimum_attack_charge": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum attack indicator charge to attack"
+            },
+            "swing_animation": {
+              "type": "object",
+              "description": "Customize swing animation",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["none", "whack", "stab"],
+                  "default": "whack"
+                },
+                "duration": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 6
+                }
+              }
+            },
+            "damage_type": {
+              "type": "string",
+              "description": "Damage type this weapon deals (e.g., 'minecraft:campfire')"
+            },
+            "break_sound": {
+              "type": "string",
+              "description": "Sound when item breaks from durability"
+            },
+            "fireworks": {
+              "type": "object",
+              "description": "Firework rocket properties",
+              "properties": {
+                "flight_duration": {
+                  "type": "integer",
+                  "minimum": -128,
+                  "maximum": 127,
+                  "default": 1
+                },
+                "explosions": {
+                  "type": "array",
+                  "maxItems": 256,
+                  "items": {
+                    "type": "object",
+                    "required": ["shape"],
+                    "properties": {
+                      "shape": {
+                        "type": "string",
+                        "enum": [
+                          "small_ball",
+                          "large_ball",
+                          "star",
+                          "creeper",
+                          "burst"
+                        ]
+                      },
+                      "colors": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                      },
+                      "fade_colors": {
+                        "type": "array",
+                        "items": { "type": "integer" }
+                      },
+                      "has_trail": { "type": "boolean" },
+                      "has_twinkle": { "type": "boolean" }
+                    }
+                  }
+                }
+              }
+            },
+            "firework_explosion": {
+              "type": "object",
+              "description": "Firework star explosion",
+              "required": ["shape"],
+              "properties": {
+                "shape": {
+                  "type": "string",
+                  "enum": [
+                    "small_ball",
+                    "large_ball",
+                    "star",
+                    "creeper",
+                    "burst"
+                  ]
+                },
+                "colors": {
+                  "type": "array",
+                  "items": { "type": "integer" }
+                },
+                "fade_colors": {
+                  "type": "array",
+                  "items": { "type": "integer" }
+                },
+                "has_trail": { "type": "boolean" },
+                "has_twinkle": { "type": "boolean" }
+              }
+            },
+            "charged_projectiles": {
+              "type": "array",
+              "description": "Projectiles loaded in crossbow",
+              "items": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "count": { "type": "integer", "default": 1 }
+                }
+              }
+            },
+            "bundle_contents": {
+              "type": "array",
+              "description": "Items stored in bundle",
+              "items": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "count": { "type": "integer", "default": 1 },
+                  "components": { "type": "object" }
+                }
+              }
+            },
+            "container": {
+              "type": "array",
+              "description": "Items in container (shulker box, chest, etc.)",
+              "items": {
+                "type": "object",
+                "required": ["slot", "item"],
+                "properties": {
+                  "slot": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 255
+                  },
+                  "item": {
+                    "type": "object",
+                    "required": ["id"],
+                    "properties": {
+                      "id": { "type": "string" },
+                      "count": { "type": "integer", "default": 1 },
+                      "components": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            },
+            "container_loot": {
+              "type": "object",
+              "description": "Loot table for container",
+              "required": ["loot_table"],
+              "properties": {
+                "loot_table": { "type": "string" },
+                "seed": { "type": "integer" }
+              }
+            },
+            "lock": {
+              "type": "object",
+              "description": "Item predicate to unlock container",
+              "properties": {
+                "items": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "array", "items": { "type": "string" } }
+                  ]
+                },
+                "count": { "type": "integer" },
+                "components": { "type": "object" }
+              }
+            },
+            "banner_patterns": {
+              "type": "array",
+              "description": "Banner patterns (for banners and shields)",
+              "items": {
+                "type": "object",
+                "required": ["pattern", "color"],
+                "properties": {
+                  "pattern": { "type": "string" },
+                  "color": {
+                    "type": "string",
+                    "enum": [
+                      "white",
+                      "orange",
+                      "magenta",
+                      "light_blue",
+                      "yellow",
+                      "lime",
+                      "pink",
+                      "gray",
+                      "light_gray",
+                      "cyan",
+                      "purple",
+                      "blue",
+                      "brown",
+                      "green",
+                      "red",
+                      "black"
+                    ]
+                  }
+                }
+              }
+            },
+            "base_color": {
+              "type": "string",
+              "description": "Base color for shield banner",
+              "enum": [
+                "white",
+                "orange",
+                "magenta",
+                "light_blue",
+                "yellow",
+                "lime",
+                "pink",
+                "gray",
+                "light_gray",
+                "cyan",
+                "purple",
+                "blue",
+                "brown",
+                "green",
+                "red",
+                "black"
+              ]
+            },
+            "pot_decorations": {
+              "type": "array",
+              "description": "Pottery sherd decorations on decorated pot (4 items)",
+              "maxItems": 4,
+              "items": { "type": "string" }
+            },
+            "map_color": {
+              "type": "integer",
+              "description": "Map color for filled maps"
+            },
+            "map_id": {
+              "type": "integer",
+              "description": "Map ID for filled maps"
+            },
+            "map_decorations": {
+              "type": "object",
+              "description": "Map markers",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["type", "x", "z", "rotation"],
+                "properties": {
+                  "type": { "type": "string" },
+                  "x": { "type": "number" },
+                  "z": { "type": "number" },
+                  "rotation": { "type": "number" }
+                }
+              }
+            },
+            "lodestone_tracker": {
+              "type": "object",
+              "description": "Lodestone compass tracking",
+              "properties": {
+                "target": {
+                  "type": "object",
+                  "properties": {
+                    "pos": {
+                      "type": "array",
+                      "items": { "type": "integer" },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "dimension": { "type": "string" }
+                  }
+                },
+                "tracked": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "instrument": {
+              "type": "string",
+              "description": "Goat horn instrument ID"
+            },
+            "recipes": {
+              "type": "array",
+              "description": "Recipes to unlock (knowledge book)",
+              "items": { "type": "string" }
+            },
+            "profile": {
+              "oneOf": [
+                { "type": "string", "description": "Player name" },
+                {
+                  "type": "object",
+                  "description": "Player profile for heads",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "id": {
+                      "type": "array",
+                      "description": "UUID as int array",
+                      "items": { "type": "integer" },
+                      "minItems": 4,
+                      "maxItems": 4
+                    },
+                    "texture": { "type": "string" },
+                    "cape": { "type": "string" },
+                    "model": {
+                      "type": "string",
+                      "enum": ["wide", "slim"]
+                    },
+                    "properties": { "type": "array" }
+                  }
+                }
+              ]
+            },
+            "note_block_sound": {
+              "type": "string",
+              "description": "Sound for note block with this head above"
+            },
+            "writable_book_content": {
+              "type": "object",
+              "description": "Book and quill content",
+              "properties": {
+                "pages": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "type": "string" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "raw": { "type": "string" },
+                          "filtered": { "type": "string" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "written_book_content": {
+              "type": "object",
+              "description": "Written book content",
+              "properties": {
+                "pages": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "$ref": "#/definitions/text_component" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "raw": { "$ref": "#/definitions/text_component" },
+                          "filtered": { "$ref": "#/definitions/text_component" }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "title": {
+                  "oneOf": [
+                    { "type": "string", "maxLength": 32 },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "raw": { "type": "string", "maxLength": 32 },
+                        "filtered": { "type": "string" }
+                      }
+                    }
+                  ]
+                },
+                "author": { "type": "string" },
+                "generation": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 3,
+                  "description": "0=original, 1=copy, 2=copy of copy, 3=tattered"
+                },
+                "resolved": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "block_state": {
+              "type": "object",
+              "description": "Force block state when placing",
+              "additionalProperties": { "type": "string" }
+            },
+            "block_entity_data": {
+              "type": "object",
+              "description": "Block entity NBT when placed",
+              "required": ["id"],
+              "additionalProperties": true
+            },
+            "entity_data": {
+              "type": "object",
+              "description": "Entity NBT when spawned",
+              "required": ["id"],
+              "additionalProperties": true
+            },
+            "bucket_entity_data": {
+              "type": "object",
+              "description": "Entity data for mob buckets",
+              "properties": {
+                "NoAI": { "type": "boolean" },
+                "Silent": { "type": "boolean" },
+                "NoGravity": { "type": "boolean" },
+                "Glowing": { "type": "boolean" },
+                "Invulnerable": { "type": "boolean" },
+                "Health": { "type": "number" },
+                "Age": { "type": "integer" },
+                "HuntingCooldown": { "type": "integer" }
+              }
+            },
+            "bees": {
+              "type": "array",
+              "description": "Bees stored in beehive/nest",
+              "items": {
+                "type": "object",
+                "required": [
+                  "entity_data",
+                  "min_ticks_in_hive",
+                  "ticks_in_hive"
+                ],
+                "properties": {
+                  "entity_data": { "type": "object" },
+                  "min_ticks_in_hive": { "type": "integer" },
+                  "ticks_in_hive": { "type": "integer" }
+                }
+              }
+            },
+            "debug_stick_state": {
+              "type": "object",
+              "description": "Debug stick state selection",
+              "additionalProperties": { "type": "string" }
+            },
+            "intangible_projectile": {
+              "type": "object",
+              "description": "Projectile can't be picked up",
+              "properties": {}
+            }
+          },
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "block_definition": {
+      "type": "object",
+      "required": ["id", "texture"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique block identifier (no namespace)",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "texture": {
+          "type": "string",
+          "description": "Texture filename without .png"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Block tags for mining, tools, etc.",
+          "items": {
+            "type": "string",
+            "examples": [
+              "minecraft:mineable/pickaxe",
+              "minecraft:mineable/axe",
+              "minecraft:mineable/shovel",
+              "minecraft:mineable/hoe",
+              "minecraft:needs_stone_tool",
+              "minecraft:needs_iron_tool",
+              "minecraft:needs_diamond_tool",
+              "minecraft:needs_netherite_tool"
+            ]
+          }
+        },
+        "properties": {
+          "type": "object",
+          "description": "Block physical properties (BlockBehaviour.Properties)",
+          "properties": {
+            "hardness": {
+              "type": "number",
+              "description": "Break time (0=instant, 50=obsidian)"
+            },
+            "resistance": {
+              "type": "number",
+              "description": "Explosion resistance (1200=obsidian)"
+            },
+            "requires_correct_tool": {
+              "type": "boolean",
+              "description": "Requires correct tool to drop items"
+            },
+            "light_level": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 15,
+              "description": "Light emission level (15=max)"
+            },
+            "friction": {
+              "type": "number",
+              "description": "Block friction (0.6=normal, 0.98=ice)"
+            },
+            "speed_factor": {
+              "type": "number",
+              "description": "Movement speed multiplier (1.0=normal)"
+            },
+            "jump_factor": {
+              "type": "number",
+              "description": "Jump height multiplier (1.0=normal)"
+            },
+            "sound_type": {
+              "type": "string",
+              "enum": [
+                "wood",
+                "gravel",
+                "grass",
+                "metal",
+                "glass",
+                "wool",
+                "sand",
+                "snow",
+                "chain",
+                "anvil",
+                "slime",
+                "honey",
+                "coral",
+                "bamboo",
+                "nether_wood",
+                "netherite",
+                "ancient_debris",
+                "bone",
+                "nether_ore",
+                "nether_bricks",
+                "nether_gold_ore",
+                "deepslate",
+                "deepslate_bricks",
+                "deepslate_tiles",
+                "copper",
+                "amethyst",
+                "amethyst_cluster",
+                "stone"
+              ],
+              "description": "Block sound type"
+            },
+            "no_occlusion": {
+              "type": "boolean",
+              "description": "Transparent block (light passes through)"
+            },
+            "no_collision": {
+              "type": "boolean",
+              "description": "No collision box (can walk through)"
+            }
+          }
+        },
+        "components": {
+          "$ref": "#/definitions/item_definition/properties/components",
+          "description": "Data components for the BlockItem (same as item components)"
+        },
+        "drops": {
+          "type": "array",
+          "description": "Custom drops when block is mined. If omitted, uses vanilla behavior (drops itself). Works with requires_correct_tool property.",
+          "items": {
+            "$ref": "#/definitions/block_drop"
+          }
+        }
+      }
+    },
+
+    "block_drop": {
+      "type": "object",
+      "required": ["item"],
+      "description": "Defines what item(s) drop when a block is mined",
+      "properties": {
+        "item": {
+          "type": "string",
+          "description": "Item ID to drop (e.g., 'minecraft:diamond', 'ner:custom_item')"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Exact count to drop (used if min/max not specified)"
+        },
+        "min": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum count for random range (requires max)"
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum count for random range (requires min)"
+        },
+        "chance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1.0,
+          "description": "Probability of drop (0.0-1.0, default 1.0 = always)"
+        }
+      },
+      "examples": [
+        {
+          "item": "minecraft:diamond",
+          "count": 2
+        },
+        {
+          "item": "minecraft:emerald",
+          "min": 1,
+          "max": 3
+        },
+        {
+          "item": "ner:rare_gem",
+          "count": 1,
+          "chance": 0.25
+        }
+      ]
+    }
+  },
+
+  "oneOf": [
+    {
+      "type": "array",
+      "description": "Array of item definitions (items.json format)",
+      "items": {
+        "$ref": "#/definitions/item_definition"
+      }
+    },
+    {
+      "type": "array",
+      "description": "Array of block definitions (blocks.json format)",
+      "items": {
+        "$ref": "#/definitions/block_definition"
+      }
+    }
+  ],
+
+  "examples": [
+    {
+      "items": [
+        {
+          "id": "healing_apple",
+          "texture": "apple",
+          "components": {
+            "consumable": {
+              "consume_seconds": 1.6,
+              "animation": "eat",
+              "on_consume_effects": [
+                {
+                  "type": "apply_effects",
+                  "effects": [
+                    { "id": "regeneration", "duration": 200, "amplifier": 1 }
+                  ]
+                }
+              ]
+            },
+            "food": {
+              "nutrition": 4,
+              "saturation": 2.4,
+              "can_always_eat": true
+            },
+            "custom_name": {
+              "text": "Healing Apple",
+              "color": "light_purple"
+            }
+          }
+        }
+      ]
+    }
+  ],
+
+  "important_notes": {
+    "food_items": "In Minecraft 1.21.11+, items need BOTH 'consumable' and 'food' components to be edible. The 'consumable' component makes it consumable, while 'food' provides nutrition stats.",
+    "can_always_eat": "Only works when BOTH 'consumable' and 'food' components are present with 'food.can_always_eat: true'",
+    "effects": "Food effects are now in 'consumable.on_consume_effects', not 'food.effects'",
+    "max_damage_and_stack_size": "Cannot combine max_damage with max_stack_size > 1",
+    "all_components_supported": "ALL Minecraft 1.21.11 data components are supported via automatic JSON-to-SNBT conversion",
+    "text_component_lists": "Text components can be passed as lists of text_component objects, to have multiple colored/styled parts in a single line. In an item lore this counts as a second dimension of the lore array."
+  }
+}

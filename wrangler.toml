@@ -1,0 +1,28 @@
+name = "not-enough-recipes-agent"
+compatibility_date = "2026-02-14"
+compatibility_flags = ["nodejs_compat"]
+main = "src/index.ts"
+
+# Load .md files as text (string) so they can be imported in the bundle
+[[rules]]
+type = "Text"
+globs = ["**/*.md"]
+fallthrough = true
+
+[vars]
+OPENAI_API_KEY = "..."
+REPLICATE_API_TOKEN = "..."
+R2_PUBLIC_BASE_URL = "http://localhost:8787"
+
+[[r2_buckets]]
+binding = "TEXTURE_BUCKET"
+bucket_name = "texture-assets"
+
+[durable_objects]
+bindings = [
+  { name = "ThinkingAgent", class_name = "ThinkingAgent" },
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ThinkingAgent"]

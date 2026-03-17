@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+.wrangler
+
+# Environment & secrets
+.env
+.env.*
+*.vars
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.idea
+.vscode
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Test / coverage
+coverage
+.nyc_output
+
+# Optional
+.cache
