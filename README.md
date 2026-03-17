@@ -1,6 +1,6 @@
 # Not Enough Recipes — Agent API 🧙‍♂️✨
 
-The **brain** behind [Not Enough Recipes](https://github.com/scuffi/not-enough-recipes-mod)! This is the AI service that turns your Creation Altar recipes into new items, blocks, pixel art textures, and even little JavaScript scripts — all without restarting the game.
+The **brain** behind [Not Enough Recipes](https://github.com/scuffi/not-enough-recipes-mod)! This is the AI service that turns your Creation Altar recipes into new items, blocks, pixel art textures, and even little JavaScript scripts
 
 **The mod** = the altar in Minecraft where you slap stuff in a 3×3 grid + a theme. **This repo** = the agent (Cloudflare Worker + LLM) that dreams up the new content and ships back item definitions, textures (via Replicate → R2), and optional event scripts. Players use the mod; this is the backend that makes the magic happen. 🪄
 
